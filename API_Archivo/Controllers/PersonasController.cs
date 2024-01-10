@@ -179,7 +179,7 @@ namespace API_Archivo.Controllers
 
 
                 try
-                {
+                { 
 
                     conexion.Open();
 
@@ -187,6 +187,8 @@ namespace API_Archivo.Controllers
 
                     while (reader.Read())
                     {
+                        DateTime ffecha = reader.GetDateTime(5);
+
                         Persona.Add(new Personas() { 
                             id_persona = reader.GetInt32(0), 
                             nombre = reader.GetString(1), 
@@ -194,7 +196,7 @@ namespace API_Archivo.Controllers
                             apellido_mat = reader.GetString(3),
                             id_lote = reader.GetInt32(7),
                            telefono = reader.GetString(4),
-                            fecha_nacimiento = reader.GetDateTime(5),
+                            fecha_nacimiento = ffecha.ToString("yyyy-MM-dd"),
                             correo = reader.GetString(10),
                             contrasenia = reader.GetString(11),
                             id_fraccionamiento = reader.GetInt32(6),
@@ -348,6 +350,8 @@ namespace API_Archivo.Controllers
 
                     while (reader.Read())
                     {
+                        DateTime ffecha = reader.GetDateTime(5);
+
                         Persona.Add(new Personas()
                         {
                             id_persona = reader.GetInt32(0),
@@ -356,7 +360,7 @@ namespace API_Archivo.Controllers
                             apellido_mat = reader.GetString(3),
                             id_lote = reader.GetInt32(7),
                             telefono = reader.GetString(4),
-                            fecha_nacimiento = reader.GetDateTime(5),
+                            fecha_nacimiento = ffecha.ToString("yyyy-MM-dd"),
                             correo = reader.GetString(10),
                             contrasenia = reader.GetString(11),
                             id_fraccionamiento = reader.GetInt32(6),
@@ -436,5 +440,183 @@ namespace API_Archivo.Controllers
             }
         }
 
+
+        [HttpGet]
+        [Route("Consultar_Ultima_Persona")]
+
+        public List<Personas> Consultar_Ultima_Persona(int id_fraccionamiento)
+        {
+           List<Personas> Lista_Personas = new List<Personas>();
+          //  int id_persona = 0;
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM personas ORDER BY id_persona DESC LIMIT 1;", conexion);
+
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Lista_Personas.Add(new Personas()
+                         {
+                      //  return reader.GetInt32(0);
+                     id_persona = reader.GetInt32(0),
+                       });
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Lista_Personas;
+            }
+        }
+
+
+
+        [HttpGet]
+        [Route("Consultar_Personas_Por_Lote")]
+
+        public List<Personas> Consultar_Personas_Por_Lote(int id_persona)
+        {
+            List<Personas> Lista_Personas = new List<Personas>();
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM personas WHERE id_persona=@id_persona", conexion);
+
+                comando.Parameters.Add("@id_persona", MySqlDbType.Int32).Value = id_persona;
+
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Lista_Personas.Add(new Personas()
+                        {
+                            id_persona = reader.GetInt32(0),
+                            nombre = reader.GetString(1),
+                            apellido_pat = reader.GetString(2),
+                            apellido_mat = reader.GetString(3),
+                            telefono = reader.GetString(4),
+                            tipo_usuario = reader.GetString(13),
+                            id_fraccionamiento = reader.GetInt32(6),
+                            id_lote = reader.GetInt32(7),
+                            correo = reader.GetString(10)
+                        });
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Lista_Personas;
+            }
+        }
+
+        /*
+
+        [HttpGet]
+        [Route("Consultar")]
+
+        public List<Personas> Consultar(int id_persona)
+        {
+            List<Personas> Persona = new List<Personas>();
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM lotes where id_propietario =@id_administrador", conexion);
+                //y id_fraccionamiento
+                //  comando.Parameters.Add("@Nombre", MySqlDbType.Int32).Value = nombre;
+                //  comando.Parameters.Add("@Apellido_pat", MySqlDbType.Int32).Value = apellido_pat;
+                comando.Parameters.Add("@id_administrador", MySqlDbType.Int32).Value = id_administrador;
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        DateTime ffecha = reader.GetDateTime(5);
+
+                        Persona.Add(new Personas()
+                        {
+                            id_persona = reader.GetInt32(0),
+                            nombre = reader.GetString(1),
+                            apellido_pat = reader.GetString(2),
+                            apellido_mat = reader.GetString(3),
+                            id_lote = reader.GetInt32(7),
+                            telefono = reader.GetString(4),
+                            fecha_nacimiento = ffecha.ToString("yyyy-MM-dd"),
+                            correo = reader.GetString(10),
+                            contrasenia = reader.GetString(11),
+                            id_fraccionamiento = reader.GetInt32(6),
+                            tipo_usuario = reader.GetString(13)
+                            /*    intercomunicador = reader.GetInt32(8),
+                                codigo_acceso = reader.GetString(9),
+                                correo = reader.GetString(10),
+                                contrasenia = reader.GetString(11)
+                            */
+        /*
+                        });
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Persona;
+            }
+        }
+
+        */
     }
+
 }
+

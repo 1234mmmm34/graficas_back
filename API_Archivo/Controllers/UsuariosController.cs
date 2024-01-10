@@ -91,6 +91,15 @@ namespace API_Archivo.Controllers
         }
 
         [HttpGet]
+        [Route("Consultar_ArrendatariosYPropietarios")]
+        public List<Personas> Consultar_ArrendatariosYPropietarios(int id_fraccionamiento)
+        {
+            Personas obj_persona = new Personas();
+            List<Personas> list_Personas = obj_persona.Consultar_Personas_Por_Fraccionamiento(id_fraccionamiento);
+            return list_Personas;
+        }
+
+        [HttpGet]
         [Route("Consultar_Usuario")]
         public List<Personas> Consultar_Usuario(string nombre, string apellido_pat, string apellido_mat)
         {
@@ -133,10 +142,10 @@ namespace API_Archivo.Controllers
 
         [HttpPost]
         [Route("Generar_Invitacion")]
-        public string Generar_invitacion(string token, string correo_electronico, int id_fraccionamiento)
+        public string Generar_invitacion(string token, string correo_electronico, int id_fraccionamiento, int id_lote, string nombre_fraccionamiento, string nombre_admin, string tipo_usuario)
         {
             Invitaciones obj_invitacion = new Invitaciones();
-            if (obj_invitacion.Generar_invitacion(token, correo_electronico, id_fraccionamiento))
+            if (obj_invitacion.Generar_invitacion(token, correo_electronico, id_fraccionamiento, id_lote, nombre_fraccionamiento, nombre_admin, tipo_usuario))
             {
                 return "Invitacion generada correctamente";
             }

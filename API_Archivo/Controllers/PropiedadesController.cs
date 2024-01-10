@@ -171,6 +171,7 @@ namespace API_Archivo.Controllers
         {
 
             List<Propiedades> Propiedad = new List<Propiedades>();
+            string nombre_renta, nombre;
 
             using (MySqlConnection conexion = new MySqlConnection(cadena_conexion))
             {
@@ -189,13 +190,36 @@ namespace API_Archivo.Controllers
 
                     while (reader.Read())
                     {
-                        Propiedad.Add(new Propiedades() { id_lote = reader.GetInt32(0), 
-                            id_fraccionamiento = reader.GetInt32(1), 
-                            descripcion = reader.GetString(2), 
-                            tipo = reader.GetString(3), 
+                        if (reader.GetInt32(6) == 0)
+                        {
+                            nombre_renta = "N/A";
+                        }
+                        else { 
+                            nombre_renta = consultar_nombre(reader.GetInt32(6)); 
+                        }
+
+                        if (reader.GetInt32(5) == 0)
+                        {
+                            nombre = "Correo enviado";
+                        }
+                        else
+                        {
+                            nombre = consultar_nombre(reader.GetInt32(5));
+                        }
+
+                        Propiedad.Add(new Propiedades()
+                        {
+                            id_lote = reader.GetInt32(0),
+                            id_fraccionamiento = reader.GetInt32(1),
+                            descripcion = reader.GetString(2),
+                            tipo = reader.GetString(3),
                             direccion = reader.GetString(4),
                             id_propietario = reader.GetInt32(5),
-                            id_renta = reader.GetInt32(6) });
+                            id_renta = reader.GetInt32(6),
+                            nombre = nombre,
+                            nombre_renta = nombre_renta
+
+                        }) ;
                         // MessageBox.Show();
                     }
 
@@ -215,6 +239,59 @@ namespace API_Archivo.Controllers
 
         }
 
+        [HttpGet]
+        [Route("Consultar_nombre")]
+        public string consultar_nombre(int id_persona)
+        {
+            string nombre="Correo enviado";
+
+            using (MySqlConnection conexion1 = new MySqlConnection(cadena_conexion))
+            {
+
+                MySqlCommand comando1 = new MySqlCommand("SELECT * FROM personas WHERE id_persona=@id_persona", conexion1);
+
+                comando1.Parameters.Add("@id_persona", MySqlDbType.Int32).Value = id_persona;
+
+
+                try
+                {
+
+                    conexion1.Open();
+
+                    MySqlDataReader reader1 = comando1.ExecuteReader();
+
+                    while (reader1.Read())
+                    {
+                        /*
+                        Propiedad.Add(new Propiedades()
+                        {
+                            id_lote = reader.GetInt32(0),
+                            id_fraccionamiento = reader.GetInt32(1),
+                            descripcion = reader.GetString(2),
+                            tipo = reader.GetString(3),
+                            direccion = reader.GetString(4),
+                            id_propietario = reader.GetInt32(5),
+                            id_renta = reader.GetInt32(6)
+                        });
+                        */
+                        nombre = reader1.GetString(1) + " " + reader1.GetString(2) + " " + reader1.GetString(3);
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion1.Close();
+                }
+
+                return nombre;
+            }
+        }
 
     }
 }

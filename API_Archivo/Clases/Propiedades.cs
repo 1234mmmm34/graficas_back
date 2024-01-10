@@ -21,5 +21,11 @@ namespace API_Archivo.Clases
 
         public int id_administrador { get; set; }
 
+        public string nombre { get; set; }
+
+        public string nombre_renta { get; set; }
+
+
+
     }
 }

@@ -188,6 +188,8 @@ namespace API_Archivo.Controllers
 
             List<Notificaciones> Lista_notificaciones = new List<Notificaciones>();
 
+            
+
             using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
             {
 
@@ -195,6 +197,62 @@ namespace API_Archivo.Controllers
 
                 comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
                 comando.Parameters.Add("@id_destinatario", MySqlDbType.Int32).Value = id_destinatario;
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Lista_notificaciones.Add(new Notificaciones() { id_notificacion = reader.GetInt32(0), id_fraccionamiento = reader.GetInt32(1), tipo = reader.GetString(2), id_destinatario = reader.GetInt32(3), asunto = reader.GetString(4), mensaje = reader.GetString(5) });
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Lista_notificaciones;
+            }
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Consultar_Notificaciones")]
+
+        public List<Notificaciones> Consultar_Notificaciones(int id_fraccionamiento)
+        {
+            /* Para consultar notificaciones se utilizará el id del fraccionamiento y el id del destinatario,
+         * cuando se quieran consultar las notificaciones generales(de todos los usuarios) se deberá 
+         * utilizar el numero cero (0) como parametro en el id del destinatario.
+         * Cuando se quiera consultar las notificaciones especificas de un usuario se deberá utilizar su id
+         * de usuario */
+
+            List<Notificaciones> Lista_notificaciones = new List<Notificaciones>();
+
+
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM notificaciones WHERE id_fraccionamiento=@id_fraccionamiento", conexion);
+
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+              //  comando.Parameters.Add("@id_destinatario", MySqlDbType.Int32).Value = id_destinatario;
 
 
                 try

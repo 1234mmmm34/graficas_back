@@ -137,32 +137,35 @@ namespace CardManagement
 
         public static bool InsertCardUser(string id_usuario)
         {
-                string szUrl = "/ISAPI/AccessControl/CardInfo/SetUp?format=json";
-                string szResponse = string.Empty;
-                string szRequest = "{\"CardInfo\":{\"employeeNo\":\"" + id_usuario +
-                    "\",\"cardNo\":\"" + id_usuario +
-                    "\",\"cardType\":\"normalCard\"}}";
-                string szMethod = "PUT";
 
-                bool res = false;
-                szResponse = ActionISAPI(szUrl, szRequest, szMethod);
-                if (szResponse != string.Empty)
+            var token = Guid.NewGuid().ToString();
+
+            string szUrl = "/ISAPI/AccessControl/CardInfo/SetUp?format=json";
+            string szResponse = string.Empty;
+            string szRequest = "{\"CardInfo\":{\"employeeNo\":\"" + id_usuario +
+                "\",\"cardNo\":\"" + token +
+                "\",\"cardType\":\"normalCard\"}}";
+            string szMethod = "PUT";
+
+            bool res = false;
+            szResponse = ActionISAPI(szUrl, szRequest, szMethod);
+            if (szResponse != string.Empty)
+            {
+                ResponseStatus rs = JsonConvert.DeserializeObject<ResponseStatus>(szResponse);
+                if (1 == rs.statusCode)
                 {
-                    ResponseStatus rs = JsonConvert.DeserializeObject<ResponseStatus>(szResponse);
-                    if (1 == rs.statusCode)
-                    {
-                        Console.WriteLine("Add Card Succ!");
-                         res= true;
-                    }
-                    else
-                    {
-                        Console.WriteLine(rs.errorMsg);
-                        res= false;
-                    }
+                    Console.WriteLine("Add Card Succ!");
+                    res = true;
                 }
-
-                return res;
+                else
+                {
+                    Console.WriteLine(rs.errorMsg);
+                    res = false;
+                }
             }
+
+            return res;
+        }
 
         public static bool DeleteCardUser(string id_usuario)
         {
@@ -191,7 +194,36 @@ namespace CardManagement
             return res;
         }
 
+
+        public static bool DeleteAllUser(string id_usuario)
+        {
+            string szUrl = "/ISAPI/AccessControl/UserInfoDetail/Delete?format=json";
+            string szResponse = string.Empty;
+            string szRequest = "{\"UserInfoDetail\":{\"mode\":\"byEmployeeNo\",\"EmployeeNoList\":[{\"employeeNo\":\"" + id_usuario + "\"}]}}";
+            string szMethod = "PUT";
+
+            szResponse = ActionISAPI(szUrl, szRequest, szMethod);
+
+            bool res = false;
+
+            if (szResponse != string.Empty)
+            {
+                ResponseStatus rs = JsonConvert.DeserializeObject<ResponseStatus>(szResponse);
+                if (rs.statusString.Equals("OK"))
+                {
+                    Console.WriteLine("Delete Card Succ!");
+                    res = true;
+                }
+                else
+                {
+                    Console.WriteLine(rs.statusString);
+                }
+            }
+            return res;
         }
+
+
     }
+}
 
 

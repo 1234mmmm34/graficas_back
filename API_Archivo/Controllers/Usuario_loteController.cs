@@ -26,18 +26,18 @@ namespace API_Archivo.Controllers
                 //Nombre_fraccionamiento=@Nombre_fraccionamiento, Direccion=@Direccion, Coordenadas=@Coordenadas, id_administrador=@id_administrador, id_tesorero=@id_tesorero)
 
                 comando.Parameters.Add("@id_usuario", MySqlDbType.Int32).Value = request.id_usuario;
-                comando.Parameters.Add("@id_lote", MySqlDbType.Int32).Value = request.id_lote;
+                comando.Parameters.Add("@id_lote", MySqlDbType.Int32).Value = request.id_usuario;
                 comando.Parameters.Add("@id_renta", MySqlDbType.Int32).Value = request.id_renta;
                 comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = request.id_fraccionamiento;
                 comando.Parameters.Add("@codigo_acceso", MySqlDbType.VarChar).Value = request.codigo_acceso;
                 comando.Parameters.Add("@intercomunicador", MySqlDbType.VarChar).Value = request.intercomunicador;
                 comando.Parameters.Add("@nombre", MySqlDbType.VarChar).Value = request.nombre;
-
+                /*
                 DateTime now = DateTime.Now;
                 DateTime Dateproximo_pago = DateTime.Now.AddDays(90);
                 string fechaProximoPago = Dateproximo_pago.ToString("yyyy-MM-ddTHH:mm:ss");
                 string fechaActual = now.ToString("yyyy-MM-ddTHH:mm:ss");
-
+                */
                 try
                 {
                     conexion.Open();
@@ -46,7 +46,7 @@ namespace API_Archivo.Controllers
                     if (rowsaffected >= 1)
                     {
                         AddDevice.Login("admin", "Repara123", "5551", "187.216.118.73");
-                        AddDevice.InsertUser(request.id_usuario.ToString(), request.nombre, fechaActual, fechaProximoPago);
+                      //  AddDevice.InsertUser(request.id_usuario.ToString(), request.nombre, fechaActual, fechaProximoPago);
                         AddDevice.InsertCardUser(request.id_usuario.ToString());
                         fraccionamiento_agregado = true;
                     }
