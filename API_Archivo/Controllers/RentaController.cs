@@ -49,7 +49,7 @@ namespace API_Archivo.Controllers
                     {
                         Agregar_Arrendatario = true;
                         AddDevice.InsertUser(id_usuario.ToString(), id_usuario.ToString(), fechaActual, fechaProximoPago);
-                        AddDevice.InsertCardUser(id_usuario.ToString());
+                      //  AddDevice.InsertCardUser(id_usuario.ToString());
 
                     }
 

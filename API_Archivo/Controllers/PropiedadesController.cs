@@ -171,7 +171,7 @@ namespace API_Archivo.Controllers
         {
 
             List<Propiedades> Propiedad = new List<Propiedades>();
-            string nombre_renta, nombre;
+            string nombre_renta="", nombre="";
 
             using (MySqlConnection conexion = new MySqlConnection(cadena_conexion))
             {
@@ -190,12 +190,15 @@ namespace API_Archivo.Controllers
 
                     while (reader.Read())
                     {
-                        if (reader.GetInt32(6) == 0)
+                        
+                    /*    if (reader.GetInt32(6) == 0)
                         {
                             nombre_renta = "N/A";
                         }
                         else { 
+                    */
                             nombre_renta = consultar_nombre(reader.GetInt32(6)); 
+                        /*
                         }
 
                         if (reader.GetInt32(5) == 0)
@@ -204,8 +207,9 @@ namespace API_Archivo.Controllers
                         }
                         else
                         {
+                        */
                             nombre = consultar_nombre(reader.GetInt32(5));
-                        }
+                      //  }
 
                         Propiedad.Add(new Propiedades()
                         {

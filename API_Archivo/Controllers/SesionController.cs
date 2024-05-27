@@ -1,8 +1,10 @@
-﻿/*
+﻿
 using API_Archivo.Clases;
+using CardManagement;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Bcpg;
+using System.Data;
 
 namespace API_Archivo.Controllers
 {
@@ -14,21 +16,26 @@ namespace API_Archivo.Controllers
         [HttpGet]
         [Route("Iniciar_Sesion")]
 
-
         public List<Sesion> Iniciar_Sesion(string correo, string contrasenia)
         {
             List<Sesion> list_sesion = new List<Sesion>();
+            string frac;
 
             using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
             {
                 int rowsaffected = 0;
-                MySqlCommand comando = new MySqlCommand("SELECT * from personas WHERE Correo = @Correo && Contrasenia = @Contrasenia", conexion);
+                DataTable dt = new DataTable();
 
-                //@id_fraccionamiento, @Nombre_deuda, @Descripción, @Monto, @Fecha_corte, @Periodicidad_dias
+                string ip = "";
 
-                comando.Parameters.Add("@Correo", MySqlDbType.VarChar).Value = correo;
-                comando.Parameters.Add("@Contrasenia", MySqlDbType.VarChar).Value = contrasenia;
+                //  string ip="", port="", user = "", password = "";
 
+                MySqlCommand comando = new MySqlCommand("sp_login", conexion);
+
+                comando.CommandType = CommandType.StoredProcedure;
+
+                comando.Parameters.AddWithValue("@correo", correo);
+                comando.Parameters.AddWithValue("@pass", contrasenia);
 
                 try
                 {
@@ -36,15 +43,49 @@ namespace API_Archivo.Controllers
 
                     MySqlDataReader reader = comando.ExecuteReader();
 
-                    //    if(AddDevice.Login("admin", "Repara123", "5551", "187.216.118.73") == true)
-                    //    {
-                    while (reader.Read())
+                    dt.Load(reader);
+
+
+                    int tesorero = 0;
+                    bool var = false;
+
+                    foreach (DataRow row in dt.Rows)
                     {
-                        list_sesion.Add(new Sesion() { correo = reader.GetString(1), id_usuario = reader.GetInt32(0), tipo_usuario = reader.GetString(13) });
+                        tesorero = Obtener_Tesorero(row.Field<int>("id_persona"));
+                        ip = row.IsNull("ip") ? "" : row.Field<string>("ip");
+
+                        if (ip != "")
+                        {
+                            var = AddDevice.Login(row.Field<string>("user"), row.Field<string>("password"), row.Field<string>("port"), row.Field<string>("ip"));
+                        }
+
+                        list_sesion.Add(new Sesion()
+                        {
+                            id_usuario = row.Field<int>("id_persona"),
+                            correo = row.Field<string>("correo"),
+                            tipo_usuario = row.Field<string>("tipo_usuario"),
+                            id_fraccionamiento = row.IsNull("id_fraccionamiento") ? 0 : row.Field<int>("id_fraccionamiento"),
+                            id_lote = row.IsNull("id_lote") ? 0 : row.Field<int>("id_lote"),
+                            fraccionamiento = row.IsNull("codigo_acceso") ? "" : row.Field<string>("codigo_acceso"),
+                            id_tesorero = tesorero,
+                            nombre = row.Field<string>("nombre"),
+                            //  ip = row.Field<string>("ip"),
+                            //  port = row.Field<string>("port"),
+                            //  password = row.Field<string>("password"),
+                            //  user = row.Field<string>("user"),
+                            conexion = var
+
+                        });
+
+                        /*
+                        ip = row.Field<string>("ip");
+                        port = row.Field<string>("port");
+                        password = row.Field<string>("password");
+                        user = row.Field<string>("user");
+                        */
+
                         // AddDevice.Login("admin", "Repara123", "5551", "187.216.118.73");
                     }
-
-                    //    }
 
 
                 }
@@ -55,84 +96,55 @@ namespace API_Archivo.Controllers
                 finally
                 {
                     conexion.Close();
+                    //  AddDevice.Login(user, password, port, ip);
                 }
+
                 return list_sesion;
             }
 
         }
-
-
-    }
-}
-*/
-
-
-using API_Archivo.Clases;
-using Microsoft.AspNetCore.Mvc;
-using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Bcpg;
-
-namespace API_Archivo.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class SesionController
-    {
 
         [HttpGet]
-        [Route("Iniciar_Sesion")]
-
-
-        public List<Sesion> Iniciar_Sesion(string correo, string contrasenia)
+        [Route("Obtener_Tesorero")]
+        public int Obtener_Tesorero(int id_administrador)
         {
-            List<Sesion> list_sesion = new List<Sesion>();
+            int tesorero = 0;
 
             using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
             {
-                int rowsaffected = 0;
-                MySqlCommand comando = new MySqlCommand("SELECT * from personas WHERE Correo = @Correo && Contrasenia = @Contrasenia", conexion);
 
-                //@id_fraccionamiento, @Nombre_deuda, @Descripción, @Monto, @Fecha_corte, @Periodicidad_dias
+                MySqlCommand comando = new MySqlCommand("SELECT id_persona FROM personas WHERE id_fraccionamiento=@id_administrador && tipo_usuario='tesorero'", conexion);
 
-                comando.Parameters.Add("@Correo", MySqlDbType.VarChar).Value = correo;
-                comando.Parameters.Add("@Contrasenia", MySqlDbType.VarChar).Value = contrasenia;
+                comando.Parameters.Add("@id_administrador", MySqlDbType.Int32).Value = id_administrador;
 
 
                 try
                 {
+
                     conexion.Open();
 
                     MySqlDataReader reader = comando.ExecuteReader();
 
-                    //    if(AddDevice.Login("admin", "Repara123", "5551", "187.216.118.73") == true)
-                    //    {
-                    while (reader.Read())
+                    if (reader.Read())
                     {
-                        list_sesion.Add(new Sesion() { correo = reader.GetString(1), id_usuario = reader.GetInt32(0), tipo_usuario = reader.GetString(13), id_fraccionamiento = reader.IsDBNull(6) ? 0 : reader.GetInt32(6), id_lote = reader.IsDBNull(7) ? 0 : reader.GetInt32(7) });
-                        // AddDevice.Login("admin", "Repara123", "5551", "187.216.118.73");
+                        tesorero = reader.GetInt32(0);
                     }
-
-                    //    }
 
 
                 }
                 catch (MySqlException ex)
                 {
-                    //MessageBox.Show(ex.ToString());
+
                 }
                 finally
                 {
                     conexion.Close();
                 }
 
-                //Deudas obj_deudas = new Deudas();
-
-                //obj_deudas.AsignarDeudasAUltimaPersona(list_sesion[0].id_fraccionamiento);
-                return list_sesion;
+                return tesorero;
             }
-
         }
-
-
     }
+
+
 }

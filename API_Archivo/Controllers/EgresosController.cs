@@ -177,8 +177,8 @@ namespace API_Archivo.Controllers
 
                     while (reader.Read())
                     {
-                        Lista_egresos.Add(new Egresos() { concepto = reader.GetString(2), descripcion = reader.GetString(3), proveedor = reader.GetString(4), monto = reader.GetDouble(5), fecha = reader.GetString(6) });
-                        // MessageBox.Show();
+                        Lista_egresos.Add(new Egresos() { id_egreso = reader.GetInt32(0), concepto = reader.GetString(2), descripcion = reader.GetString(3), proveedor = reader.GetString(4), monto = reader.GetDouble(5), fecha = reader.GetString(6) });
+
                     }
 
 

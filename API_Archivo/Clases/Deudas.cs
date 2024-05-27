@@ -1,33 +1,6 @@
-﻿/*namespace API_Archivo.Clases
-{
-    public class Deudas
+﻿
 
-    {
-        public int id_deudas { get; set; } //primary key
-
-        public int id_fraccionamiento { get; set; }
-
-        public int id_tesorero { get; set; }
-
-        public float monto { get; set; }
-
-        public string nombre { get; set; }
-
-        public string descripcion { get; set; }
-
-        public int dias_gracia { get; set; }
-
-        public int periodicidad { get; set; }
-
-        public float recargo { get; set; }
-
-        public DateTime proximo_pago { get; set; }
-    }
-}
-*/
-
-
-
+using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using System.Reflection.PortableExecutable;
 
@@ -57,6 +30,12 @@ namespace API_Archivo.Clases
 
         public DateTime proximo_pago { get; set; }
 
+        public string proximo_pago1 { get; set; }
+
+
+        [HttpGet]
+        [Route("Consultar_DeudasOrdinarias")]
+
         public List<Deudas> Consultar_DeudasOrdinarias(int id_tesorero)
         {
 
@@ -65,9 +44,9 @@ namespace API_Archivo.Clases
             using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
             {
 
-                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudas WHERE id_tesorero=@id_tesorero && periodicidad>0", conexion);
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudas WHERE id_fraccionamiento=@id_fraccionamiento && periodicidad>0", conexion);
 
-                comando.Parameters.Add("@id_tesorero", MySqlDbType.Int32).Value = id_tesorero;
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_tesorero;
 
 
                 try
@@ -109,6 +88,10 @@ namespace API_Archivo.Clases
             }
 
         }
+
+
+        [HttpGet]
+        [Route("Consultar_DeudasExtraordinarias")]
 
         public List<Deudas> Consultar_DeudasExtraordinarias(int id_tesorero)
         {
@@ -163,6 +146,71 @@ namespace API_Archivo.Clases
 
         }
 
+
+        [HttpGet]
+        [Route("Consultar_DeudaPorId")]
+
+        public List<Deudoress> Consultar_DeudaPorId(int id_deudor, int id_deuda, int id_fraccionamiento)
+        {
+
+            List<Deudoress> Deuda = new List<Deudoress>();
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudores WHERE id_deudor=@id_deudor && id_deuda=@id_deuda && id_fraccionamiento=@id_fraccionamiento", conexion);
+
+                comando.Parameters.Add("@id_deudor", MySqlDbType.Int64).Value = id_deudor;
+                comando.Parameters.Add("@id_deuda", MySqlDbType.Int64).Value = id_deuda;
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int64).Value = id_fraccionamiento;
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Deuda.Add(new Deudoress()
+                        {
+                            id_deudor = reader.GetInt32(1),
+                            id_deuda = reader.GetInt32(2),
+                            id_fraccionamiento = reader.GetInt32(3),
+                            nombre_persona = !reader.IsDBNull(4) ? reader.GetString(4) : "",
+                            lote = !reader.IsDBNull(5) ? reader.GetInt32(5) : 0,
+                            tipo_deuda = reader.GetString(6),
+                            nombre_deuda = reader.GetString(7),
+                            monto = reader.GetFloat(8),
+                            recargo = reader.GetFloat(9),
+                            dias_gracia = reader.GetInt32(10),
+                            proximo_pago = (reader.GetDateTime(11)).ToString("yyyy-MM-ddTHH:mm:ss"),
+                            estado = reader.GetString(12),
+                            periodicidad = reader.GetInt32(13)
+
+                        });
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Deuda;
+            }
+        }
+
+        [HttpGet]
+        [Route("AsignarDeudaNuevaATodos")]
         public bool AsignarDeudaNuevaATodos(int id_fraccionamiento, string destinatario)
         {
             List<Deudas> Deuda = new List<Deudas>();
@@ -236,6 +284,8 @@ namespace API_Archivo.Clases
                     isindividual = true;
                     query = "SELECT * FROM personas where id_administrador=@id_administrador && id_persona=@id_persona";
                 }
+                //query = "SELECT * FROM personas where (id_administrador=@id_administrador) && (tipo_usuario='arrendatario' OR tipo_usuario='propietario' OR tipo_usuario='usuario')";
+
 
                 MySqlCommand comando = new MySqlCommand(query, conexion);
                 //y id_fraccionamiento
@@ -258,8 +308,6 @@ namespace API_Archivo.Clases
 
                     while (reader.Read())
                     {
-                        DateTime ffecha = reader.GetDateTime(5);
-
                         Persona.Add(new Personas()
                         {
                             id_persona = reader.IsDBNull(0) ? -1 : reader.GetInt32(0),
@@ -268,7 +316,7 @@ namespace API_Archivo.Clases
                             apellido_mat = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             id_lote = reader.IsDBNull(7) ? null : (int?)reader.GetInt32(7),
                             telefono = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            fecha_nacimiento = ffecha.ToString("yyyy-MM-dd"),
+                            fecha_nacimiento = reader.IsDBNull(5) ? "0000-00-00" : Convert.ToString(reader.GetDateTime(5)),
                             correo = reader.IsDBNull(10) ? "" : reader.GetString(10),
                             contrasenia = reader.IsDBNull(11) ? "" : reader.GetString(11),
                             id_fraccionamiento = reader.IsDBNull(6) ? -1 : reader.GetInt32(6),
@@ -350,6 +398,9 @@ namespace API_Archivo.Clases
 
         }
 
+        [HttpGet]
+        [Route("AsignarDeudasAUltimaPersona")]
+
         public bool AsignarDeudasAUltimaPersona(int id_fraccionamiento)
         {
             List<Personas> UltimaPersona = new List<Personas>();
@@ -366,8 +417,6 @@ namespace API_Archivo.Clases
 
                     while (reader.Read())
                     {
-                        DateTime ffecha = reader.GetDateTime(5);
-
                         UltimaPersona.Add(new Personas()
                         {
                             id_persona = reader.IsDBNull(0) ? -1 : reader.GetInt32(0),
@@ -376,7 +425,7 @@ namespace API_Archivo.Clases
                             apellido_mat = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             id_lote = reader.IsDBNull(7) ? null : (int?)reader.GetInt32(7),
                             telefono = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            fecha_nacimiento = ffecha.ToString("yyyy-MM-dd"),
+                            fecha_nacimiento = reader.IsDBNull(5) ? "0000-00-00" : Convert.ToString(reader.GetDateTime(5)),
                             correo = reader.IsDBNull(10) ? "" : reader.GetString(10),
                             contrasenia = reader.IsDBNull(11) ? "" : reader.GetString(11),
                             id_fraccionamiento = reader.IsDBNull(6) ? -1 : reader.GetInt32(6),
@@ -494,7 +543,8 @@ namespace API_Archivo.Clases
 
         }//fin del metodo
 
-
+        [HttpDelete]
+        [Route("EliminarDeudasAUsuarios")]
         public bool EliminarDeudasAUsuarios(int id_deuda)
         {
             bool Deuda_eliminada = false;
@@ -531,6 +581,48 @@ namespace API_Archivo.Clases
                 return Deuda_eliminada;
 
             }
+        }
+
+        [HttpGet]
+        [Route("Consultar_Comprobante")]
+
+        public byte[] Consultar_Comprobante(int id)
+        {
+            byte[] imagen = null;
+            string connectionString = Global.cadena_conexion;
+
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT comprobante FROM historial_deudaspagadas WHERE id=@id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                if (!reader.IsDBNull(reader.GetOrdinal("comprobante")))
+                                {
+                                    long size = reader.GetBytes(reader.GetOrdinal("comprobante"), 0, null, 0, 0);
+                                    imagen = new byte[size];
+                                    reader.GetBytes(reader.GetOrdinal("comprobante"), 0, imagen, 0, (int)size);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al consultar la imagen en la base de datos: " + ex.Message);
+            }
+
+            return imagen;
         }
     }
 }

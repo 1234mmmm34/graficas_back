@@ -182,10 +182,12 @@ namespace API_Archivo.Controllers
                         DateTime ffecha = reader.GetDateTime(4);
                         //  string fecha = ffecha.ToString("yyyy-MM-dd");
 
+
                         Lista_acuerdos.Add(new Acuerdos() { id_acuerdo = reader.GetInt32(0), id_fraccionamiento = reader.GetInt32(1), asunto = reader.GetString(2), detalles = reader.GetString(3), fecha = ffecha.ToString("yyyy-MM-dd") });
-                    } 
-                        // MessageBox.Show();
-                    
+                    }
+
+                    // MessageBox.Show();
+
 
 
                 }
@@ -249,5 +251,140 @@ namespace API_Archivo.Controllers
             return File(imagenBytes, "image/jpeg"); // Cambia el tipo de contenido según el formato de tu imagen
         }
 
+
+
+        [HttpGet]
+        [Route("Consultar_Acuerdos_Paginados")]
+
+        public List<Acuerdos> Consultar_Acuerdos_Paginados(int id_fraccionamiento, int indice, int rango)
+        {
+
+
+            List<Acuerdos> Lista_acuerdos = new List<Acuerdos>();
+
+
+
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM acuerdos WHERE id_fraccionamiento=@id_fraccionamiento LIMIT @indice, @rango", conexion);
+
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+                comando.Parameters.Add("@indice", MySqlDbType.Int32).Value = indice;
+                comando.Parameters.Add("@rango", MySqlDbType.Int32).Value = rango;
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        DateTime ffecha = reader.GetDateTime(4);
+                        //  string fecha = ffecha.ToString("yyyy-MM-dd");
+
+
+                        Lista_acuerdos.Add(new Acuerdos() { id_acuerdo = reader.GetInt32(0), id_fraccionamiento = reader.GetInt32(1), asunto = reader.GetString(2), detalles = reader.GetString(3), fecha = ffecha.ToString("yyyy-MM-dd") });
+                    }
+
+
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+
+
+                }
+
+
+
+                return Lista_acuerdos;
+            }
+
+        }
+
+
+
+        [HttpGet]
+        [Route("Filtrar_Acuerdos_Fecha")]
+
+        public List<Acuerdos> Filtrar_Acuerdos_Fecha(int id_fraccionamiento, int indice, int rango, string fechaOriginal)
+        {
+
+
+            List<Acuerdos> Lista_acuerdos = new List<Acuerdos>();
+
+           // string fechaOriginal = "15-01-2024";
+
+            // Convertir la fecha al formato deseado '15/01/2024'
+            DateTime fecha = DateTime.ParseExact(fechaOriginal, "yyyy-MM-dd", null);
+            string fechaFormateada = fecha.ToString("dd/MM/yyyy");
+
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM acuerdos WHERE id_fraccionamiento=@id_fraccionamiento AND fecha = STR_TO_DATE(@fecha, '%d/%m/%Y') LIMIT @indice, @rango", conexion);
+
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+                comando.Parameters.Add("@indice", MySqlDbType.Int32).Value = indice;
+                comando.Parameters.Add("@rango", MySqlDbType.Int32).Value = rango;
+                comando.Parameters.Add("@fecha", MySqlDbType.VarChar).Value = fechaFormateada;
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        DateTime ffecha = reader.GetDateTime(4);
+                        //  string fecha = ffecha.ToString("yyyy-MM-dd");
+
+
+                        Lista_acuerdos.Add(new Acuerdos() { id_acuerdo = reader.GetInt32(0), id_fraccionamiento = reader.GetInt32(1), asunto = reader.GetString(2), detalles = reader.GetString(3), fecha = ffecha.ToString("yyyy-MM-dd") });
+                    }
+
+
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+
+
+                }
+
+
+
+                return Lista_acuerdos;
+            }
+
+        }
     }
+
+
 }
+
+
+
+
+

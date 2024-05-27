@@ -135,15 +135,17 @@ namespace CardManagement
             return res;
         }
 
-        public static bool InsertCardUser(string id_usuario)
+        public static bool InsertCardUser(string id_usuario, string codigo_acceso)
         {
-
-            var token = Guid.NewGuid().ToString();
+            // var token = Guid.NewGuid().ToString();
+            //    token.Substring(0, 3);
+           // var randomNumber = new Random().Next(0, 1000);
+        //    string token = randomNumber.ToString();
 
             string szUrl = "/ISAPI/AccessControl/CardInfo/SetUp?format=json";
             string szResponse = string.Empty;
             string szRequest = "{\"CardInfo\":{\"employeeNo\":\"" + id_usuario +
-                "\",\"cardNo\":\"" + token +
+                "\",\"cardNo\":\"" + codigo_acceso +
                 "\",\"cardType\":\"normalCard\"}}";
             string szMethod = "PUT";
 
@@ -223,6 +225,60 @@ namespace CardManagement
         }
 
 
+        public static bool RestrictedUser(string id_usuario)
+        {
+            string szUrl = "/ISAPI/AccessControl/UserInfo/Modify?format=json";
+            string szResponse = string.Empty;
+            string szRequest = "{\"UserInfo\":{\"employeeNo\":\"" + id_usuario + "\",\"Valid\":{\"enable\":false}}}";
+            string szMethod = "PUT";
+
+            szResponse = ActionISAPI(szUrl, szRequest, szMethod);
+
+            bool res = false;
+
+            if (szResponse != string.Empty)
+            {
+                ResponseStatus rs = JsonConvert.DeserializeObject<ResponseStatus>(szResponse);
+                if (rs.statusString.Equals("OK"))
+                {
+                    Console.WriteLine("Delete Card Succ!");
+                    res = true;
+                }
+                else
+                {
+                    Console.WriteLine(rs.statusString);
+                }
+            }
+            return res;
+        }
+
+
+        public static bool EnableUser(string id_usuario)
+        {
+            string szUrl = "/ISAPI/AccessControl/UserInfo/Modify?format=json";
+            string szResponse = string.Empty;
+            string szRequest = "{\"UserInfo\":{\"employeeNo\":\"" + id_usuario + "\",\"Valid\":{\"enable\":true}}}";
+            string szMethod = "PUT";
+
+            szResponse = ActionISAPI(szUrl, szRequest, szMethod);
+
+            bool res = false;
+
+            if (szResponse != string.Empty)
+            {
+                ResponseStatus rs = JsonConvert.DeserializeObject<ResponseStatus>(szResponse);
+                if (rs.statusString.Equals("OK"))
+                {
+                    Console.WriteLine("Delete Card Succ!");
+                    res = true;
+                }
+                else
+                {
+                    Console.WriteLine(rs.statusString);
+                }
+            }
+            return res;
+        }
     }
 }
 
