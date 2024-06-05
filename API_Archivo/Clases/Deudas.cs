@@ -32,6 +32,8 @@ namespace API_Archivo.Clases
 
         public string proximo_pago1 { get; set; }
 
+        public int deudor { get; set; }
+
 
         [HttpGet]
         [Route("Consultar_DeudasOrdinarias")]
@@ -267,17 +269,10 @@ namespace API_Archivo.Clases
             {
                 string query = "";
 
-                if (destinatario == "arrendatario")
+
+                if (destinatario == "todos")
                 {
-                    query = "SELECT * FROM personas where id_administrador=@id_administrador && tipo_usuario='arrendatario'";
-                }
-                else if (destinatario == "propietario")
-                {
-                    query = "SELECT * FROM personas where id_administrador=@id_administrador && tipo_usuario='propietario'";
-                }
-                else if (destinatario == "todos")
-                {
-                    query = "SELECT * FROM personas where (id_administrador=@id_administrador) && (tipo_usuario='arrendatario' OR tipo_usuario='propietario')";
+                    query = "SELECT * FROM personas where (id_administrador=@id_administrador)";
                 }
                 else
                 {

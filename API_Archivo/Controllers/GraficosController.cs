@@ -25,7 +25,7 @@ namespace API_Archivo.Controllers
             {
                 double suma = 0;
 
-                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudores WHERE id_fraccionamiento=@id_fraccionamiento", conexion);
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudores WHERE id_fraccionamiento=@id_fraccionamiento and estado='Pendiente'", conexion);
 
                 comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
 
@@ -153,6 +153,59 @@ namespace API_Archivo.Controllers
                 }
 
                 return Graficos;
+            }
+        }
+
+
+        [HttpGet]
+        [Route("Consultar_Entradas")]
+        public List<Entradas> Consultar_Entradas()
+        {
+
+            List<Entradas> Entradas = new List<Entradas>();
+
+
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM entradas LIMIT 9", conexion);
+
+                // comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+
+                        Entradas.Add(new Entradas()
+                        {
+                            id_entrada = reader.GetInt32(0),
+                            fecha = reader.GetDateTime(1),
+                            nombre = reader.GetString(2),
+
+                        });
+                    }
+
+                }
+
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Entradas;
             }
         }
     }

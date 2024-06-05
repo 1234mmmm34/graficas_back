@@ -92,8 +92,8 @@ namespace API_Archivo.Controllers
                 {
                     int rowsaffected = 0;
                     MySqlCommand comando = new MySqlCommand("UPDATE personas " +
-                        "SET Contrasenia=@Contrasenia " +
-                        "WHERE Correo=@Correo", conexion);
+                        "SET contrasenia=@Contrasenia " +
+                        "WHERE correo=@Correo", conexion);
 
                     comando.Parameters.Add("@Correo", MySqlDbType.VarChar).Value = correo;
                     comando.Parameters.Add("@Contrasenia", MySqlDbType.VarChar).Value = contrasenia;

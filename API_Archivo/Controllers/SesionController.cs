@@ -56,7 +56,7 @@ namespace API_Archivo.Controllers
 
                         if (ip != "")
                         {
-                            var = AddDevice.Login(row.Field<string>("user"), row.Field<string>("password"), row.Field<string>("port"), row.Field<string>("ip"));
+                            var = AddDevice.Login(row.Field<string>("user"), row.Field<string>("password"), row.Field<string>("port"),row.Field<string>("ip"));
                         }
 
                         list_sesion.Add(new Sesion()
@@ -69,6 +69,7 @@ namespace API_Archivo.Controllers
                             fraccionamiento = row.IsNull("codigo_acceso") ? "" : row.Field<string>("codigo_acceso"),
                             id_tesorero = tesorero,
                             nombre = row.Field<string>("nombre"),
+                            nom_controlador = row.Field<string>("con_nombre"),
                             //  ip = row.Field<string>("ip"),
                             //  port = row.Field<string>("port"),
                             //  password = row.Field<string>("password"),

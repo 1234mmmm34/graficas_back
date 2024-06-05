@@ -22,6 +22,8 @@ namespace API_Archivo.Clases
 
         public string nombre { get; set; }
 
+        public string nom_controlador { get; set; }
+
         public bool conexion {  get; set; }
 
 
